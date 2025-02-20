@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: Book-Management-Project
+  datasource:
+    url: jdbc:mysql://localhost:3306/book_db
+    username: test
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update   # 개발 단계에서는 update, 운영 시에는 validate나 none 등 적절히 조정
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+kakao:
+  api:
+    key: ${KAKAO_API_KEY:"NULL_API_KEY"}   # 환경 변수
+    url: https://dapi.kakao.com/v3/search/book
+

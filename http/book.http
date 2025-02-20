@@ -1,0 +1,12 @@
+@bookId = 1
+
+GET http://localhost:8080/api/books/external
+
+###
+GET http://localhost:8080/api/books
+
+###
+GET http://localhost:8080/api/books/551
+#    query={{$random.alphanumeric(8)}}
+
+
