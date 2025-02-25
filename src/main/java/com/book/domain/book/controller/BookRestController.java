@@ -37,12 +37,13 @@ public class BookRestController {
 
     @GetMapping("/search")
     public ApiResponse<List<Book>> search(
-            @RequestParam("query") String query,
-            @RequestParam("category") String category,
-            @RequestParam("page") int page,
-            @RequestParam("size") int size
+            @RequestParam("kw") String kw,
+            @RequestParam(value = "sort", defaultValue = "datetime") String sort,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "field", required = false) String field
     ) {
-        List<Book> books = bookService.search(query, category, page, size);
+        List<Book> books = bookService.search(kw, sort, page, size, field);
         return ApiResponse.success(books);
     }
 

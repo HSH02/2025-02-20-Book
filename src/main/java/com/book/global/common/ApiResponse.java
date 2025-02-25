@@ -27,9 +27,9 @@ public record ApiResponse<T>(boolean success, String message, T data, int status
      *
      * @return 성공 응답 객체
      */
-    public static <T> ApiResponse<T> success() {
-        return of(true, "요청 성공", null, HttpStatus.OK);
-    }
+//    public static <T> ApiResponse<T> success() {
+//        return of(true, "요청 성공", null, HttpStatus.OK);
+//    }
 
     /**
      * 200 응답을 반환합니다.

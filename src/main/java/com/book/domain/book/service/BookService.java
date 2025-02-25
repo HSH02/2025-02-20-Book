@@ -6,25 +6,29 @@ import com.book.domain.book.entity.Book;
 import com.book.domain.book.repository.BookRepository;
 import com.google.gson.Gson;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.Serial;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 // TODO : HttpHeaders, restTemplate, QueryDSL
-@RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class BookService {
 
     @Value("${kakao.api.key}")
@@ -36,6 +40,13 @@ public class BookService {
     private final BookRepository bookRepository;
     private final RestTemplate restTemplate;
 
+    @Autowired
+    public BookService(BookRepository bookRepository, RestTemplate restTemplate) {
+        this.bookRepository = bookRepository;
+        this.restTemplate = restTemplate;
+    }
+
+    @Transactional
     public void fetchAndSaveNewBooks(String query) {
         int size = 50;  // 한 페이지당 최대 50건
         int page = 1;
@@ -134,9 +145,42 @@ public class BookService {
         return bookRepository.findAll(pageable).getContent();
     }
 
-    public List<Book> search(String query, String category, int page, int size) {
-        // TODO
-        return null;
+    public List<Book> search(String kw, String sort, int page, int size, String field) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort).descending());
+        Specification<Book> spec = search(kw, field);
+        return bookRepository.findAll(spec, pageable);
+    }
+
+    public Specification<Book> search(String kw, String field) {
+        return (root, query, criteriaBuilder) -> {
+            // 검색 대상이 명시되지 않은 경우, 모든 필드에 대해 검색
+            if (field == null || field.trim().isEmpty()) {
+                Predicate titlePredicate = criteriaBuilder.like(root.get("title"), "%" + kw + "%");
+                Predicate contentsPredicate = criteriaBuilder.like(root.get("contents"), "%" + kw + "%");
+                Predicate authorsPredicate = criteriaBuilder.like(root.get("authors"), "%" + kw + "%");
+                Predicate categoryPredicate = criteriaBuilder.like(root.get("publisher"), "%" + kw + "%");
+                return criteriaBuilder.or(titlePredicate, contentsPredicate, authorsPredicate, categoryPredicate);
+            }
+
+            // 검색 대상이 지정된 경우 해당 필드에 대해서만 검색
+            switch (field.toLowerCase()) {
+                case "title":
+                    return criteriaBuilder.like(root.get("title"), "%" + kw + "%");
+                case "contents":
+                    return criteriaBuilder.like(root.get("contents"), "%" + kw + "%");
+                case "authors":
+                    return criteriaBuilder.like(root.get("authors"), "%" + kw + "%");
+                case "publisher":
+                    return criteriaBuilder.like(root.get("publisher"), "%" + kw + "%");
+                default:
+                    // 잘못된 필드명이 전달되면 기본적으로 전체 필드를 검색하도록 처리
+                    Predicate titlePredicate = criteriaBuilder.like(root.get("title"), "%" + kw + "%");
+                    Predicate contentsPredicate = criteriaBuilder.like(root.get("contents"), "%" + kw + "%");
+                    Predicate authorsPredicate = criteriaBuilder.like(root.get("authors"), "%" + kw + "%");
+                    Predicate categoryPredicate = criteriaBuilder.like(root.get("publisher"), "%" + kw + "%");
+                    return criteriaBuilder.or(titlePredicate, contentsPredicate, authorsPredicate, categoryPredicate);
+            }
+        };
     }
 
     public Book findById(long bookId) {

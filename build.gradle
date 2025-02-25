@@ -40,9 +40,6 @@ dependencies {
     // Apache HttpClient 5.x 및 HttpCore 5.x (버전을 5.2.3으로 사용)
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.4.2'
     implementation 'org.apache.httpcomponents.core5:httpcore5:5.3.3'
-
-    implementation 'com.querydsl:querydsl-jpa:5.0.0'
-    annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jpa'
 }
 
 

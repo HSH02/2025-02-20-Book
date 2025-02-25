@@ -1,12 +1,21 @@
 @bookId = 1
 
+### external get
 GET http://localhost:8080/api/books/external
 
-###
+### findAll
 GET http://localhost:8080/api/books
 
-###
+### findbyId
 GET http://localhost:8080/api/books/551
-#    query={{$random.alphanumeric(8)}}
+
+### search
+GET http://localhost:8080/api/books/search?
+    kw=강&
+    sort=datetime&
+    page=1&
+    size=10
+#    filed=authors
+
 
 
